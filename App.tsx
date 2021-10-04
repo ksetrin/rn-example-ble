@@ -91,27 +91,19 @@ const App = () => {
                     device
                       .readCharacteristicForService(service.uuid, c.uuid)
                       .then(r => {
-                        console.log('value r', r.value);
-                        console.log('base64', Buffer.from(r.value,'base64'));
-                        // console.log('decode', base64.decode(r.value));
-
-
+                        console.log('value r', r.value, Buffer.from(r.value, 'base64'));
                       })
                       .catch(error => {
                         console.log('r err', error.message, error);
                       });
+
+                  c.isNotifiable &&
+                    service.monitorCharacteristic(c.uuid, (error, char) => {
+                      console.log('Notifiable', c.uuid, error, char);
+                    });
                 });
               });
             });
-
-            // device
-            //   .readCharacteristicForService(SERVICE_UUID, CHARACTERISTIC_UUID)
-            //   .then(characteristic => {
-            //     console.log('characteristic', characteristic);
-            //   })
-            //   .catch(error => {
-            //     console.log('characteristic err', error.message, error);
-            //   });
           })
           .catch(error => {
             console.log('xxxxxxxx-14', error.message, error);
