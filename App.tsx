@@ -4,7 +4,12 @@ import {BleManager} from 'react-native-ble-plx';
 import {Buffer} from 'buffer';
 import base64 from 'react-native-base64';
 
+const SERVICE_UUID = '0000fee0-0000-1000-8000-00805f9b34fb';
+const CHARACTERISTIC_UUID = '00000007-0000-3512-2118-0009af100700';
+
 const manager = new BleManager();
+manager.setLogLevel('Verbose');
+
 const App = () => {
   React.useEffect(() => {
     console.log('xxxxxxxx-1');
@@ -24,42 +29,50 @@ const App = () => {
   const scanAndConnect = () => {
     console.log('xxxxxxxx-5');
     manager.startDeviceScan(null, null, (error, device) => {
-      console.log(
-        'xxxxxxxx-6',
-        device.name,
-        // device.localName,
-        device.isConnectable,
-      );
+      console.log('xxxxxxxx-6', device.name, device.isConnectable);
 
       if (error) {
         console.log('xxxxxxxx-7');
-        // Handle error (scanning will be stopped automatically)
         return;
       }
 
-      // Check if it is a device you are looking for based on advertisement data
-      // or other criteria.
       if (device.name === 'MI Band 2') {
         console.log('xxxxxxxx-8');
-        // Stop scanning as it's not necessary if you are scanning for one device.
         manager.stopDeviceScan();
         console.log('xxxxxxxx-9');
 
         device
-          .connect()
+          .connect({autoConnect: false}) //, timeout: 0
           .then(device1 => {
-            device.onDisconnected((error,device) => {
-              console.log('>> onDisconnected', error,device)
+            console.log('xxxxxxxx-10', new Date());
+
+            device.onDisconnected((error, device) => {
+              console.log('>> onDisconnected', error, new Date());
             });
 
-            console.log('xxxxxxxx-10');
-            return device1.discoverAllServicesAndCharacteristics();
+            return device1.discoverAllServicesAndCharacteristics(); // important
           })
           .then(async device2 => {
-            console.log('xxxxxxxx-10');
-            const services = await manager.servicesForDevice(device.id);
+            console.log('xxxxxxxx-11');
 
-            // console.log('Services:', services);
+            const services = await manager.servicesForDevice(device.id);
+            // services.forEach((service, i) => {
+            //   // console.log('service uuid', service.uuid);
+            //   service.characteristics().then(characteristic => {
+            //     characteristic.forEach(c => {
+            //       console.log(
+            //         'characteristic',
+            //         c.uuid,
+            //         'service',
+            //         service.uuid,
+            //         c.isReadable && 'isReadable',
+            //         c.isNotifiable && 'isNotifiable',
+            //         c.isNotifying && 'isNotifying',
+            //         c.isIndicatable && 'isIndicatable',
+            //       );
+            //     });
+            //   });
+            // });
 
             services.forEach((service, i) => {
               console.log('service uuid', service.uuid);
@@ -72,18 +85,33 @@ const App = () => {
                     c.isNotifiable && 'isNotifiable',
                     c.isNotifying && 'isNotifying',
                     c.isIndicatable && 'isIndicatable',
-                  ),
-                    // characteristic.monitor((error, char) => {
-                    //   console.log('xxxxxxxx-13-3', error, char);
-                    // });
+                  );
 
-                    c.isNotifiable &&
-                      service.monitorCharacteristic(c.uuid, (error, char) => {
-                        console.log('xxxxxxxx-13-3', c.uuid, error, char);
+                  c.isReadable &&
+                    device
+                      .readCharacteristicForService(service.uuid, c.uuid)
+                      .then(r => {
+                        console.log('value r', r.value);
+                        console.log('base64', Buffer.from(r.value,'base64'));
+                        // console.log('decode', base64.decode(r.value));
+
+
+                      })
+                      .catch(error => {
+                        console.log('r err', error.message, error);
                       });
                 });
               });
             });
+
+            // device
+            //   .readCharacteristicForService(SERVICE_UUID, CHARACTERISTIC_UUID)
+            //   .then(characteristic => {
+            //     console.log('characteristic', characteristic);
+            //   })
+            //   .catch(error => {
+            //     console.log('characteristic err', error.message, error);
+            //   });
           })
           .catch(error => {
             console.log('xxxxxxxx-14', error.message, error);
@@ -94,7 +122,7 @@ const App = () => {
 
   return (
     <SafeAreaView>
-      <Text>BLE</Text>
+      <Text>BLE1234567</Text>
     </SafeAreaView>
   );
 };
