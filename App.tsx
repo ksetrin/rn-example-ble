@@ -33,7 +33,8 @@ const App = () => {
         return;
       }
 
-      if (device.name === 'GS-SalsaConnect') {
+      // if (device.name === 'MI Band 2') {
+      if (device?.name === 'GS-SalsaConnect') {
         console.log('xxxxxxxx-8');
         manager.stopDeviceScan();
         console.log('xxxxxxxx-9');
@@ -50,45 +51,94 @@ const App = () => {
             return device1.discoverAllServicesAndCharacteristics(); // important
           })
           .then(async device2 => {
-            console.log('xxxxxxxx-11', device2);
+            console.log('xxxxxxxx-11', device2.id);
 
-            device.monitorCharacteristicForService(
-              '0003CDD0-0000-1000-8000-00805F9B0131',
-              '0003CDD1-0000-1000-8000-00805F9B0131',
-              (error, obj) => {
-                console.log(
-                  'error',
-                  error,
-                  'NOTIFICATION>>>',
-                  JSON.stringify(obj),
-                );
+            const services = await manager.servicesForDevice(device.id);
 
-                if (error) {
-                  console.log('monitorCharacteristicForService ERROR');
-                  return;
-                }
+            services.forEach(service => {
+              service.characteristics().then(characteristic => {
+                characteristic.forEach(c => {
+                  console.log(
+                    'characteristic',
+                    c.uuid,
+                    'service',
+                    service.uuid,
+                    c.isReadable && 'isReadable',
+                    c.isNotifiable && 'isNotifiable',
+                    c.isNotifying && 'isNotifying',
+                    c.isIndicatable && 'isIndicatable',
+                  );
 
-                // // commands
-                // const lastBloodValue = 'ewEgARATVQABAQQDBwd9'; // Command for last History
-                // const deviceUnit = 'ewEQASCqVQAAAgENCH0='; // Device Unit
-                //
-                // console.log('WriteQ START ');
-                //
-                // device
-                //   .writeCharacteristicWithoutResponseForService(
-                //     '0003CDD0-0000-1000-8000-00805F9B0131',
-                //     '0003CDD2-0000-1000-8000-00805F9B0131',
-                //     deviceUnit,
-                //   )
-                //   .then(async result => {
-                //     console.log('WriteQ RESULT', result);
-                //     handleResult(result);
-                //   })
-                //   .catch(error => {
-                //     console.log('xxxxxxxx-14', error.message, error);
-                //   });
-              },
-            );
+                  c.isReadable &&
+                    device
+                      .readCharacteristicForService(service.uuid, c.uuid)
+                      .then(r => {
+                        console.log(
+                          'value r',
+                          r.value,
+                          Buffer.from(r.value, 'base64'),
+                        );
+                      })
+                      .catch(error => {
+                        console.log('r err', error.message, error);
+                      });
+
+                  c.isNotifiable &&
+                    service.monitorCharacteristic(c.uuid, (error, char) => {
+                      if (error) {
+                        console.log('monitorCharacteristic ERROR', error?.message);
+                      } else {
+                        console.log(
+                          'monitorCharacteristic SUCCESS',
+                          c.uuid,
+                          'service',
+                          service.uuid,
+                          'NOTIFICATION>>>',
+                          JSON.stringify(char),
+                        );
+                      }
+                    });
+                });
+              });
+            });
+
+            // device.monitorCharacteristicForService(
+            //   '0003CDD0-0000-1000-8000-00805F9B0131',
+            //   '0003CDD1-0000-1000-8000-00805F9B0131',
+            //   (error, obj) => {
+            //     console.log(
+            //       'error',
+            //       error,
+            //       'NOTIFICATION>>>',
+            //       JSON.stringify(obj),
+            //     );
+            //
+            //     if (error) {
+            //       console.log('monitorCharacteristicForService ERROR');
+            //       return;
+            //     }
+            //
+            //     // // commands
+            //     // const lastBloodValue = 'ewEgARATVQABAQQDBwd9'; // Command for last History
+            //     // const deviceUnit = 'ewEQASCqVQAAAgENCH0='; // Device Unit
+            //     //
+            //     // console.log('WriteQ START ');
+            //     //
+            //     // device
+            //     //   .writeCharacteristicWithoutResponseForService(
+            //     //     '0003CDD0-0000-1000-8000-00805F9B0131',
+            //     //     '0003CDD2-0000-1000-8000-00805F9B0131',
+            //     //     deviceUnit,
+            //     //   )
+            //     //   .then(async result => {
+            //     //     console.log('WriteQ RESULT', result);
+            //     //     handleResult(result);
+            //     //   })
+            //     //   .catch(error => {
+            //     //     console.log('xxxxxxxx-14', error.message, error);
+            //     //   });
+            //   },
+            // );
           })
           .catch(error => {
             console.log('xxxxxxxx-14', error.message, error);
