@@ -68,25 +68,25 @@ const App = () => {
                   return;
                 }
 
-                // commands
-                const lastBloodValue = 'ewEgARATVQABAQQDBwd9'; // Command for last History
-                const deviceUnit = 'ewEQASCqVQAAAgENCH0='; // Device Unit
-
-                console.log('WriteQ START ');
-
-                device
-                  .writeCharacteristicWithoutResponseForService(
-                    '0003CDD0-0000-1000-8000-00805F9B0131',
-                    '0003CDD2-0000-1000-8000-00805F9B0131',
-                    deviceUnit,
-                  )
-                  .then(async result => {
-                    console.log('WriteQ RESULT', result);
-                    handleResult(result);
-                  })
-                  .catch(error => {
-                    console.log('xxxxxxxx-14', error.message, error);
-                  });
+                // // commands
+                // const lastBloodValue = 'ewEgARATVQABAQQDBwd9'; // Command for last History
+                // const deviceUnit = 'ewEQASCqVQAAAgENCH0='; // Device Unit
+                //
+                // console.log('WriteQ START ');
+                //
+                // device
+                //   .writeCharacteristicWithoutResponseForService(
+                //     '0003CDD0-0000-1000-8000-00805F9B0131',
+                //     '0003CDD2-0000-1000-8000-00805F9B0131',
+                //     deviceUnit,
+                //   )
+                //   .then(async result => {
+                //     console.log('WriteQ RESULT', result);
+                //     handleResult(result);
+                //   })
+                //   .catch(error => {
+                //     console.log('xxxxxxxx-14', error.message, error);
+                //   });
               },
             );
           })
