@@ -75,10 +75,10 @@ const App = () => {
                 console.log('WriteQ START ');
 
                 device
-                  .writeCharacteristicWithResponseForService(
+                  .writeCharacteristicWithoutResponseForService(
                     '0003CDD0-0000-1000-8000-00805F9B0131',
                     '0003CDD2-0000-1000-8000-00805F9B0131',
-                    lastBloodValue,
+                    deviceUnit,
                   )
                   .then(async result => {
                     console.log('WriteQ RESULT', result);
